@@ -1,0 +1,10 @@
+[package]
+name = "quotient"
+version = "0.1.0"
+authors = ["Tom Crossland <tom.crossland@bluetab.net>"]
+
+[dependencies]
+uuid = { version = "0.2", features = ["v4"] }
+byteorder = "0.5.3"
+log = "0.3"
+log4rs = "0.5.2"
