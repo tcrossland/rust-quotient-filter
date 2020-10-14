@@ -1,10 +1,10 @@
-use filter::slot::{IntSlot, Slot, Run, Cluster, FLAGS};
+use quotient::slot::{Cluster, IntSlot, Run, Slot, FLAGS};
 use std::collections::btree_map::BTreeMap;
 
 pub trait StatsCollector {
     fn new() -> Stats;
     fn collect(self, usize, &IntSlot) -> Stats;
-    fn print(&self) -> ();
+    fn print(&self);
 }
 
 pub struct Stats {
@@ -26,7 +26,7 @@ impl StatsCollector for Stats {
             current_run: Vec::new(),
             longest_run: Vec::new(),
             current_cluster: Vec::new(),
-            longest_cluster: Vec::new()
+            longest_cluster: Vec::new(),
         }
     }
     fn collect(mut self, pos: usize, slot: &IntSlot) -> Stats {
@@ -62,7 +62,7 @@ impl StatsCollector for Stats {
         }
         self
     }
-    fn print(&self) -> () {
+    fn print(&self) {
         info!("=========================== STATISTICS ===========================");
         info!("Slot Statistics (O=Occupied, C=Continuation, S=Shifted):");
         for (k, v) in &self.flags {
@@ -71,9 +71,9 @@ impl StatsCollector for Stats {
         info!("Total Clusters: {}", self.clusters);
         info!("Total Runs: {}", self.runs);
         info!("Longest cluster: {} runs", self.longest_cluster.len());
-        for (i,r) in self.longest_cluster.iter().enumerate() {
+        for (i, r) in self.longest_cluster.iter().enumerate() {
             for s in r.iter() {
-                info!(" {:>3} 0x{:08x}:{}", i+1, s.0, s.1.fmt());
+                info!(" {:>3} 0x{:08x}:{}", i + 1, s.0, s.1.fmt());
             }
         }
         info!("Longest run: {} slots", self.longest_run.len());
