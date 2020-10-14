@@ -3,11 +3,9 @@ use std::collections::btree_map::BTreeMap;
 
 pub trait StatsCollector {
     fn new() -> Stats;
-    fn collect(mut self, usize, &IntSlot) -> Stats;
+    fn collect(self, usize, &IntSlot) -> Stats;
     fn print(&self) -> ();
 }
-
-type SlotPair = (usize, IntSlot);
 
 pub struct Stats {
     flags: BTreeMap<IntSlot, usize>,

@@ -1,13 +1,13 @@
 use byteorder::{BigEndian, ReadBytesExt};
 use std::io::Cursor;
+use uuid::Bytes;
 use uuid::Uuid;
-use uuid::UuidBytes;
 
 pub const HASH_SIZE: u8 = 56;
 pub const QUOT_SIZE: u8 = 27;
 const REM_SIZE: u8 = HASH_SIZE - QUOT_SIZE;
 
-fn hash(bytes: &UuidBytes, size: u8) -> u64 {
+fn hash(bytes: &Bytes, size: u8) -> u64 {
     let mut rdr = Cursor::new(bytes);
     let msb: u64 = rdr.read_u64::<BigEndian>().unwrap();
     let lsb: u64 = rdr.read_u64::<BigEndian>().unwrap();

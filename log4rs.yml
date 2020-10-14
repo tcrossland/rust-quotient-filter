@@ -13,8 +13,3 @@ root:
   level: info
   appenders:
     - stdout
-
-loggers:
-  # Raise the maximum log level for events sent to the "app::backend::db" logger to "debug"
-  # app::backend::db:
-  #   level: info

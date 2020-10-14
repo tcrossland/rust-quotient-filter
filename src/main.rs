@@ -24,7 +24,7 @@ fn insert_uuid(ref mut filter: &mut QuotientFilter, uuid: Uuid) {
     let (idx, val) = (qr.0 as usize, qr.1);
     match filter.lookup(idx, val) {
         None => filter.put(idx, val),
-        Some(s) => warn!("Found value {} in slot 0x{:08x} {}", uuid.hyphenated().to_string(), s.0, s.1.fmt())
+        Some(s) => warn!("Found value {} in slot 0x{:08x} {}", uuid.to_hyphenated_ref(), s.0, s.1.fmt())
     }
 }
 
@@ -43,7 +43,7 @@ fn process(slots: usize, items: usize) -> () {
         }
     }
 
-    info!("Attempting insertion of duplicate value {}, warning is expected", first_uuid.hyphenated().to_string());
+    info!("Attempting insertion of duplicate value {}, warning is expected", first_uuid.to_hyphenated_ref());
     insert_uuid(filter, first_uuid);
 
     info!("Collecting statistics (may take a few seconds)...");
