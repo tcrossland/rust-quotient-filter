@@ -1,4 +1,4 @@
-use quotient::slot::{IntSlot, Slot, SlotPair, CONTINUATION, OCCUPIED, SHIFTED};
+use crate::quotient::slot::{CONTINUATION, IntSlot, OCCUPIED, SHIFTED, Slot, SlotPair};
 
 pub trait Filter<T> {
     fn new(size: usize) -> T;
@@ -129,7 +129,7 @@ impl Filter<QuotientFilter> for QuotientFilter {
 #[cfg(test)]
 mod tests {
     use super::{Filter, QuotientFilter};
-    use quotient::slot::Slot;
+    use crate::quotient::slot::Slot;
     use std::collections::HashSet;
 
     const MAX_REMAINDER: u32 = (1 << 29) - 1;
@@ -169,17 +169,36 @@ mod tests {
         (filter, stored)
     }
 
-    fn assert_matches_set(filter: &QuotientFilter, stored: &HashSet<(usize, u32)>, absent: &[(usize, u32)]) {
+    fn assert_matches_set(
+        filter: &QuotientFilter,
+        stored: &HashSet<(usize, u32)>,
+        absent: &[(usize, u32)],
+    ) {
         for &(q, r) in stored {
-            assert!(filter.lookup(q, r).is_some(), "stored ({}, {:#x}) not found", q, r);
+            assert!(
+                filter.lookup(q, r).is_some(),
+                "stored ({}, {:#x}) not found",
+                q,
+                r
+            );
         }
         for &(q, r) in absent.iter().filter(|p| !stored.contains(p)) {
-            assert!(filter.lookup(q, r).is_none(), "absent ({}, {:#x}) found", q, r);
+            assert!(
+                filter.lookup(q, r).is_none(),
+                "absent ({}, {:#x}) found",
+                q,
+                r
+            );
         }
         assert_eq!(occupied_slots(filter), stored.len());
     }
 
-    fn random_pairs(seed: u64, count: usize, quotients: usize, remainders: u32) -> Vec<(usize, u32)> {
+    fn random_pairs(
+        seed: u64,
+        count: usize,
+        quotients: usize,
+        remainders: u32,
+    ) -> Vec<(usize, u32)> {
         let mut state = seed;
         (0..count)
             .map(|_| {
@@ -207,9 +226,22 @@ mod tests {
 
     #[test]
     fn cluster_of_runs_inserted_out_of_order() {
-        let pairs = [(2, 50), (1, 70), (3, 10), (1, 20), (2, 5), (3, 90), (1, 45), (0, 30)];
+        let pairs = [
+            (2, 50),
+            (1, 70),
+            (3, 10),
+            (1, 20),
+            (2, 5),
+            (3, 90),
+            (1, 45),
+            (0, 30),
+        ];
         let (filter, stored) = filled(32, &pairs);
-        assert_matches_set(&filter, &stored, &[(0, 31), (1, 46), (2, 6), (3, 11), (4, 10)]);
+        assert_matches_set(
+            &filter,
+            &stored,
+            &[(0, 31), (1, 46), (2, 6), (3, 11), (4, 10)],
+        );
     }
 
     #[test]

@@ -2,6 +2,7 @@
 name = "quotient"
 version = "0.2.0"
 authors = ["Tom Crossland <tom.crossland@bluetab.net>"]
+edition = "2024"
 
 [dependencies]
 uuid = { version = "0.8", features = ["v4"] }

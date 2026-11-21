@@ -1,9 +1,10 @@
-use quotient::slot::{Cluster, IntSlot, Run, Slot, FLAGS};
+use crate::quotient::slot::{Cluster, FLAGS, IntSlot, Run, Slot};
+use log::{info, warn};
 use std::collections::btree_map::BTreeMap;
 
 pub trait StatsCollector {
     fn new() -> Stats;
-    fn collect(self, usize, &IntSlot) -> Stats;
+    fn collect(self, pos: usize, slot: &IntSlot) -> Stats;
     fn print(&self);
 }
 

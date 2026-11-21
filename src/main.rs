@@ -1,15 +1,10 @@
-#[macro_use]
-extern crate log;
-extern crate byteorder;
-extern crate log4rs;
-extern crate uuid;
-
 mod quotient;
 
-use quotient::filter::{Filter, QuotientFilter};
-use quotient::hash::{QuotientRemainder, QUOT_SIZE};
-use quotient::slot::Slot;
-use quotient::stats::{Stats, StatsCollector};
+use crate::quotient::filter::{Filter, QuotientFilter};
+use crate::quotient::hash::{QUOT_SIZE, QuotientRemainder};
+use crate::quotient::slot::Slot;
+use crate::quotient::stats::{Stats, StatsCollector};
+use log::{info, warn};
 use uuid::Uuid;
 
 fn main() {
