@@ -129,19 +129,11 @@ impl Filter<QuotientFilter> for QuotientFilter {
 #[cfg(test)]
 mod tests {
     use super::{Filter, QuotientFilter};
+    use crate::quotient::random::splitmix64;
     use crate::quotient::slot::Slot;
     use std::collections::HashSet;
 
     const MAX_REMAINDER: u32 = (1 << 29) - 1;
-
-    /// SplitMix64, so that a failing seed can be run again.
-    fn next(state: &mut u64) -> u64 {
-        *state = state.wrapping_add(0x9e37_79b9_7f4a_7c15);
-        let mut z = *state;
-        z = (z ^ (z >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
-        z = (z ^ (z >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
-        z ^ (z >> 31)
-    }
 
     fn occupied_slots(filter: &QuotientFilter) -> usize {
         filter.slots.iter().filter(|s| !s.is_empty()).count()
@@ -202,7 +194,7 @@ mod tests {
         let mut state = seed;
         (0..count)
             .map(|_| {
-                let x = next(&mut state);
+                let x = splitmix64(&mut state);
                 let q = (x % quotients as u64) as usize;
                 let r = ((x >> 32) as u32) % remainders;
                 (q, r)
