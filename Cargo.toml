@@ -8,4 +8,4 @@ edition = "2024"
 uuid = { version = "0.8", features = ["v4"] }
 byteorder = "1.3"
 log = "0.4"
-log4rs = "0.13"
+log4rs = "1.4"
