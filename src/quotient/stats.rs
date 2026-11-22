@@ -3,7 +3,7 @@ use log::{info, warn};
 use std::collections::btree_map::BTreeMap;
 
 pub trait StatsCollector {
-    fn new() -> Stats;
+    fn new() -> Self;
     fn collect(self, pos: usize, slot: &IntSlot) -> Stats;
     fn print(&self);
 }
@@ -19,7 +19,7 @@ pub struct Stats {
 }
 
 impl StatsCollector for Stats {
-    fn new() -> Stats {
+    fn new() -> Self {
         Stats {
             flags: BTreeMap::new(),
             clusters: 0,
