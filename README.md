@@ -85,16 +85,15 @@ Earlier runs used a filter whose `put` could file an entry in another quotient's
 Each run handles its IDs like this (`src/main.rs`), so only its last lookup is for an ID already in the filter:
 
 ```mermaid
-flowchart TD
-    A[Seeded generator makes a new UUID] --> B[Hash it into a quotient and a remainder]
-    B --> C{lookup finds the remainder?}
-    C -- no --> D[put it in the filter]
-    C -- yes --> E[Log a warning and count a false match]
-    D --> F{More IDs?}
-    E --> F
-    F -- yes --> A
-    F -- no --> G[Look up the first UUID again, the only lookup of an ID already in the filter]
-    G --> H[Collect the slot statistics]
+flowchart LR
+    A[New UUID] --> B{lookup finds it?}
+    B -- no --> C[put]
+    B -- yes --> D[Count a false match]
+    C --> E{More IDs?}
+    D --> E
+    E -- yes --> A
+    E -- no --> F[Look up the first UUID again]
+    F --> G[Slot statistics]
 ```
 
 The filter has a fixed number of slots, while a topic's set of message IDs keeps growing, and the expected number of false matches grows with the square of the number of IDs. A consumer would need to bound the set, for example with one filter per time window, merged or dropped as windows age. Quotient filters can be merged and resized, but this prototype implements neither.
