@@ -1,7 +1,7 @@
 [package]
 name = "quotient"
 version = "0.2.0"
-authors = ["Tom Crossland <tom.crossland@bluetab.net>"]
+authors = ["Tomas Crossland"]
 edition = "2024"
 rust-version = "1.86"
 
