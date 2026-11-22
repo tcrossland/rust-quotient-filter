@@ -4,6 +4,7 @@ version = "0.3.0"
 authors = ["Tomas Crossland"]
 edition = "2024"
 rust-version = "1.86"
+publish = false
 
 [dependencies]
 uuid = { version = "0.8", features = ["v4"] }

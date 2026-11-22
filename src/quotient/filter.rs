@@ -1,7 +1,7 @@
 use crate::quotient::slot::{CONTINUATION, IntSlot, OCCUPIED, SHIFTED, Slot, SlotPair};
 
-pub trait Filter<T> {
-    fn new(size: usize) -> T;
+pub trait Filter {
+    fn new(size: usize) -> Self;
     fn shift(&mut self, idx: usize);
     fn lookup_run(&self, q: usize) -> (usize, IntSlot);
     fn lookup(&self, q: usize, r: u32) -> Option<SlotPair>;
@@ -14,8 +14,8 @@ pub struct QuotientFilter {
     pub slots: Vec<IntSlot>,
 }
 
-impl Filter<QuotientFilter> for QuotientFilter {
-    fn new(size: usize) -> QuotientFilter {
+impl Filter for QuotientFilter {
+    fn new(size: usize) -> Self {
         QuotientFilter {
             // size: size,
             slots: vec![0; size],
