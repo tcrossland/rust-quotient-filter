@@ -8,6 +8,8 @@ on:
 permissions:
   contents: read
 
+# No dependency cache: Swatinem/rust-cache is LGPL-3.0, and each job takes
+# under 30 seconds without one.
 jobs:
   lint:
     name: fmt and clippy
