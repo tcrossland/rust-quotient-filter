@@ -1,9 +1,10 @@
-use quotient::slot::{Cluster, IntSlot, Run, Slot, FLAGS};
+use crate::quotient::slot::{Cluster, FLAGS, IntSlot, Run, Slot};
+use log::{info, warn};
 use std::collections::btree_map::BTreeMap;
 
 pub trait StatsCollector {
     fn new() -> Stats;
-    fn collect(self, usize, &IntSlot) -> Stats;
+    fn collect(self, pos: usize, slot: &IntSlot) -> Stats;
     fn print(&self);
 }
 
@@ -40,12 +41,15 @@ impl StatsCollector for Stats {
                     self.longest_run = self.current_run.to_vec();
                 }
             }
+            // A cluster ends at the next cluster's start or at an empty slot.
+            if (slot.is_cluster() || slot.is_empty())
+                && self.current_cluster.len() > self.longest_cluster.len()
+            {
+                self.longest_cluster = self.current_cluster.to_vec();
+            }
             if slot.is_cluster() {
                 self.clusters += 1;
                 self.runs += 1;
-                if self.current_cluster.len() > self.longest_cluster.len() {
-                    self.longest_cluster = self.current_cluster.to_vec();
-                }
                 self.current_cluster.clear();
                 self.current_run.clear();
                 self.current_run.push((pos, *slot));
@@ -81,5 +85,33 @@ impl StatsCollector for Stats {
             info!("     0x{:08x}:{}", s.0, s.1.fmt());
         }
         info!("==================================================================");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Stats, StatsCollector};
+    use crate::quotient::filter::{Filter, QuotientFilter};
+
+    fn stats(filter: &QuotientFilter) -> Stats {
+        filter
+            .slots
+            .iter()
+            .enumerate()
+            .fold(Stats::new(), |acc, (i, slot)| acc.collect(i, slot))
+    }
+
+    #[test]
+    fn counts_clusters_that_end_at_an_empty_slot() {
+        let mut filter = QuotientFilter::new(32);
+        // Quotients 1, 2 and 3 form one cluster in slots 1 to 4; slot 5 is empty.
+        for (q, r) in [(1, 10), (1, 20), (2, 30), (3, 40), (10, 50)] {
+            filter.put(q, r);
+        }
+        let s = stats(&filter);
+        assert_eq!(s.clusters, 2);
+        assert_eq!(s.runs, 4);
+        assert_eq!(s.longest_cluster.len(), 3);
+        assert_eq!(s.longest_run.len(), 2);
     }
 }

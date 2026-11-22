@@ -1,10 +1,12 @@
 [package]
 name = "quotient"
 version = "0.2.0"
-authors = ["Tom Crossland <tom.crossland@bluetab.net>"]
+authors = ["Tomas Crossland"]
+edition = "2024"
+rust-version = "1.86"
 
 [dependencies]
 uuid = { version = "0.8", features = ["v4"] }
 byteorder = "1.3"
 log = "0.4"
-log4rs = "0.13"
+log4rs = "1.4"
