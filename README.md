@@ -85,6 +85,10 @@ Earlier runs used a filter whose `put` could file an entry in another quotient's
 Each run handles its IDs like this (`src/main.rs`), so only its last lookup is for an ID already in the filter:
 
 ```mermaid
+---
+config:
+  layout: dagre
+---
 flowchart LR
     A[New UUID] --> B{lookup finds it?}
     B -- no --> C[put]
