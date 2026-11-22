@@ -9,6 +9,7 @@
 - UUIDs come from a seeded generator, and each run logs its seed, so `--seed` repeats a run exactly.
 - The run logs the number of false matches.
 - The README explains the prototype, how to run it and what it showed.
+- README diagrams: a worked example of runs and clusters, how a UUID becomes a quotient and a remainder in a slot, a Bloom filter's lookup beside the quotient filter's, and a flowchart of how a run handles each ID.
 
 ### Fixed
 - `put` could file an entry in another quotient's run, where it could no longer be found.
