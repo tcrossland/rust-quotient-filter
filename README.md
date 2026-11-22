@@ -14,6 +14,21 @@ At the default size it held 100 million IDs in about 540 MB, around 5.4 bytes ea
 ## Findings
 The filter splits each UUID's hash into a quotient, which picks the slot, and a remainder, which is stored in it. More remainder bits mean fewer false matches; more quotient bits mean more slots. A quotient's remainders sit in adjacent slots, called a run. A cluster starts with a run in its own slot and takes in the runs pushed along behind it; a lookup may have to scan a cluster from its start.
 
+For example, putting the quotient and remainder pairs (1, 10), (1, 20), (2, 30), (3, 40) and (10, 50) into a 32-slot filter, as the test `counts_clusters_that_end_at_an_empty_slot` in `src/quotient/stats.rs` does, fills these slots. Each slot has three flags: occupied means the slot's own quotient has a run somewhere, continuation means the slot carries on the run before it, and shifted means the remainder isn't in its quotient's own slot.
+
+| Slot | Occupied | Continuation | Shifted | Remainder | What it holds |
+|---|---|---|---|---|---|
+| 0 | | | | | empty |
+| 1 | yes | | | 10 | the start of quotient 1's run, and of the cluster |
+| 2 | yes | yes | yes | 20 | the rest of quotient 1's run |
+| 3 | yes | | yes | 30 | quotient 2's run, pushed along one slot |
+| 4 | | | yes | 40 | quotient 3's run, pushed along one slot |
+| 5 | | | | | empty, which ends the cluster |
+| 6 to 9 | | | | | empty |
+| 10 | yes | | | 50 | quotient 10's run, a cluster of its own |
+
+Slot 4 isn't occupied, because quotient 4 has no remainders, though it holds quotient 3's. To find quotient 3's run, a lookup walks back from slot 3 over the shifted slots to the cluster's start at slot 1, then forward one run for each occupied quotient: past quotient 1's run in slots 1 and 2 and quotient 2's in slot 3, to slot 4. This filter has 2 clusters and 4 runs; the longest cluster holds 3 runs and the longest run 2 slots.
+
 With the defaults (27-bit quotients, 29-bit remainders) and seed 1, a run inserted 100,000,000 UUIDs into 134,218,728 slots (2^27, plus 1,000 spare at the end because the filter doesn't wrap around), about 75% full, with no false matches. About 0.07 false matches are expected at this size, so this shows false matches are rare rather than measuring their rate. The run took 10 seconds and peaked at about 540 MB of memory (measured with `/usr/bin/time -l`; Rust 1.100.0, Apple M2, November 2026). Inserting the IDs took about 6.6 seconds of that (from the log's timestamps), about 66 ns per ID on one thread, including generating each UUID and looking it up first; collecting the slot statistics took the rest.
 
 By the end of that run, the chance of a false match on a lookup is about 1.4 × 10⁻⁹ (the load, 0.745 IDs per quotient, divided by 2^29). A Bloom filter with that rate needs about 42 bits (1.44 × log2(1/p) bits per item for a false match rate p, the standard Bloom filter sizing), or 5.3 bytes, per ID, against 5.4 bytes here, so the case for a quotient filter rests on merging, resizing, deletion and locality (a lookup reads one stretch of adjacent slots, where a Bloom filter at this rate reads up to 29 scattered bits, about 2 on average for a new ID) rather than on size.
