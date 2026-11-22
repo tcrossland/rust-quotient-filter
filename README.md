@@ -82,6 +82,21 @@ For n UUIDs, q quotient bits and r remainder bits, the expected number of false 
 
 Earlier runs used a filter whose `put` could file an entry in another quotient's run, where it could no longer be found, and whose `lookup` could match against a neighbouring quotient's run. A 100-million run of that filter also reported no false matches, since the program looks up only new IDs, apart from one deliberate duplicate, and so never looked for an entry filed in the wrong run; only the unit tests in `src/quotient/filter.rs` (`cargo test`), which check every lookup against a `HashSet`, found both bugs. The figures above are from the fixed filter.
 
+Each run handles its IDs like this (`src/main.rs`), so only its last lookup is for an ID already in the filter:
+
+```mermaid
+flowchart TD
+    A[Seeded generator makes a new UUID] --> B[Hash it into a quotient and a remainder]
+    B --> C{lookup finds the remainder?}
+    C -- no --> D[put it in the filter]
+    C -- yes --> E[Log a warning and count a false match]
+    D --> F{More IDs?}
+    E --> F
+    F -- yes --> A
+    F -- no --> G[Look up the first UUID again, the only lookup of an ID already in the filter]
+    G --> H[Collect the slot statistics]
+```
+
 The filter has a fixed number of slots, while a topic's set of message IDs keeps growing, and the expected number of false matches grows with the square of the number of IDs. A consumer would need to bound the set, for example with one filter per time window, merged or dropped as windows age. Quotient filters can be merged and resized, but this prototype implements neither.
 
 For checking message IDs before processing them, I found it worked well at this scale: 100 million IDs in about 540 MB, at about 66 ns each. These figures assume random IDs: the hash XORs the two halves of each UUID (`src/quotient/hash.rs`), which is uniform when either half is random, as in version 4 and version 7 UUIDs, but not for version 1 UUIDs, whose second half is the same for every ID from one generator, so nearby IDs would share remainders and collide far more often.
